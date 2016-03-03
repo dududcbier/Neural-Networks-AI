@@ -10,7 +10,7 @@ n_epochs = 100;      % the number of epochs we want to train
 examples = [0 0; 0 1; 1 0; 1 1];
 
 % Define the corresponding target outputs
-goal = [0 0 0 1];
+goal = [1 1 1 0];
 
 % Initialize the weights and the threshold
 weights = [rand rand];

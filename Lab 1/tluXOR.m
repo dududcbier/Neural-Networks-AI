@@ -26,10 +26,7 @@ h_threshold = zeros(n_epochs,1);
 n_examples = size(examples,1);     % The number of input patterns
 n_inputs = size(examples,2);       % The number of inputs
 
-epoch = 1;
-stop = 1;
-while (epoch <= n_epochs && ~stop)
-    stop = 1;
+for epoch = 1:n_epochs
     epoch_error = zeros(n_examples,1);
     
     h_weights(epoch,:) = weights;
@@ -50,15 +47,8 @@ while (epoch <= n_epochs && ~stop)
             output = 0;
         end
         
-        examples(pattern,:)
-        output
-        
         % Compute error
         error = (goal(pattern) - output);
-        if (error ~= 0) 
-            stop = 0;
-        end
-         
         
         % Compute delta rule
         delta_weights = learn_rate * error * examples(pattern,:);
@@ -73,7 +63,6 @@ while (epoch <= n_epochs && ~stop)
     end
     
     h_error(epoch) = sum(epoch_error);
-    epoch = epoch + 1;
 end
 % Plot functions
 figure(1);

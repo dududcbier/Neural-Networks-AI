@@ -1,0 +1,231 @@
+\documentclass{article}
+\usepackage[
+        a4paper,% other options: a3paper, a5paper, etc
+        left=3cm,
+        right=3cm,
+        top=3cm,
+        bottom=4cm,
+        % use vmargin=2cm to make vertical margins equal to 2cm.
+        % us  hmargin=3cm to make horizontal margins equal to 3cm.
+        % use margin=3cm to make all margins  equal to 3cm.
+]{geometry}
+%\usepackage[utf8x]{inputenc}
+\usepackage{graphicx}
+\usepackage{caption}
+\usepackage{enumerate}
+\usepackage{subcaption}
+\usepackage[procnames]{listings}
+\usepackage{color}
+\usepackage{amssymb}
+\usepackage{amsmath}      
+\usepackage{comment}
+\usepackage{hyperref}
+\usepackage{blindtext}
+\usepackage[scaled=.8]{sourcecodepro}
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+ 
+%\renewcommand*\ttdefault{pcr} 
+ 
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\title{Lab2 Report \\ {\Large Multi-Layer Perceptron
+}}
+\date{\today}
+\author{
+  Eduardo Delgado Coloma Bier (s3065979) \\ 
+  Mikel Orbea Sotil (s3075001)
+}
+
+\lstset{style=mystyle, language=Matlab}
+\begin{document}
+\maketitle
+
+\pagebreak {}
+
+\section{Theory Questions}
+\begin{enumerate}[a)]
+ \item The credit assignment problem is the process of determining which weights are responsible for the output of the network. In other words, which weights are to blame and need to be changed when the output is not what we want? Or, when things go well, which weights are responsible and shouldn't be changed?
+
+\item The error in a hidden layer is determined by ??????????????
+
+\item The sigmoid function is defined by:
+    \begin{equation}
+        \begin{gathered}
+            \sigma (a) = \frac{1}{1 + exp[\frac{-(a - \theta)}{\rho}]}
+        \end{gathered}
+    \end{equation}
+    $\theta$ and $\rho$ are constants, while $a$ is the variable given by the activation (summed weights $\times$ input). While $\theta$ is responsible for when the curve starts going up (the larger the $\theta$, the longer it takes), $\rho$ is responsible for how smoothly it does so. With a low $\rho$ one can expect a very steep curve. 
+    The derivative of the sigmoid function is:
+    \begin{equation}
+        \begin{gathered}
+            \sigma' (a) = \frac{1}{\rho} \cdot \sigma \cdot (1 - \sigma)
+        \end{gathered}
+    \end{equation}
+    
+    
+
+\item If we initialize the weights with a very high value, chances are our activation will have a high value as well. This means that we would be on the right part of the sigmoid function, where the derivative is close to 0, which is something we don't want because the weights would be adjusted really slowly.
+
+\item One criteria we can use to choose when to stop learning is choosing a minimum error $\epsilon$ where we would stop learning if the error is smaller than 
+$\epsilon$. However, choosing the $\epsilon$ could be tricky and completely arbitrary. Another possibility would be to stop as soon as the error starts getting bigger. This method, however is not ideal since if we reach a local minimum of the function, we'd probably stop there instead of the actual optimal solution. A third stop criteria would be to keep track of the error and if it'' never lower than the last minimal error you found for a certain (big) number of epochs, than you rollback to that minimal error you found. Choosing the amount of epochs, though, can also be tricky and lead to sub optimal solutions.
+
+\item Aside from changing the learning rate, one can speed the learning of a network by choosing appropriate initial weights, neither too high or too low. Both too high and too low values for the weights would lead to $\sigma'$ values close to zero, which in turn would make every step taken by the network really small.
+
+\item  To verify that the network is generalizing for a set of training data we use cross-validation. This method consists on setting aside part of the training set to be used as a validation set after the training. If the error in the validation set starts increasing, then the network is starting to overfit and should be stopped. A problem with this method is that sometimes the error in the validation set only grows temporarily.
+
+\item Overfitting happens when a network trains for too long with a set of data and ends up incorporating too many details from that learning set. When that happens, the network works really well for the learning set, but when different inputs (not in the training set) are given to it, they are not well classified.
+
+\item Network pruning is the deletion of nodes within the network that are considered not important for the network to work. The network is therefore smaller and simpler, resulting in a better performance overall. The basic idea of pruning method is: start with a large enough network, train it with a set of data, determine the importance of the weights, remove the least important weight, retrain the network and repeat that until you get a reasonably sized network. The difference in each pruning method is basically choosing when and which node to cut. One way of doing it is always removing the weight with the lowest value. Another possibility is removing the connection with the smallest contribution (to the network) variance.
+    
+\end{enumerate}
+
+\section{An MLP on paper}
+\begin{enumerate}[a)]
+
+\item Neural network
+
+    \begin{figure}[!h]
+        \centering
+        \includegraphics[width=0.5\textwidth]{im/NN.png}
+        \caption{Neural networks with 2 input neurons, 3 hidden neurons and 2 output neurons}
+        \label{fig:NN}
+    \end{figure}
+
+\item That is considered a two layer network because the input layer is not really considered a layer as it does no computation whatsoever. 
+
+\item $W^h$ is a $2 \times 3$ matrix, while $W^o$ is a $3 \times 2$ matrix.
+
+\item The weights on the same column all go to the same neuron.
+
+\item Colored weights
+
+    \begin{figure}[!h]
+        \centering
+        \includegraphics[width=0.5\textwidth]{im/NNColors.png}
+        \caption{Neural networks with highlighted weights: $w^h_{12}$ in red and $w^o_{21}$ in blue}
+        \label{fig:NNColors}
+    \end{figure}
+    
+\pagebreak
+\item With the augmented input layer, $W^h$ is a $3 \times 3$ matrix, while $W^o$ is a $3 \times 2$ matrix.
+
+    \begin{figure}[!h]
+        \centering
+        \includegraphics[width=0.5\textwidth]{im/NNAugmented.png}
+        \caption{Neural networks augmented input layer}
+        \label{fig:NNAugmented}
+    \end{figure}
+
+\item The values of this table can be found on the first row of $W^h$
+
+\begin{table}[h]
+    \resizebox{1.0\textwidth}{!}{\begin{minipage}{\textwidth}
+    \centering
+    \begin{tabular}{ c | c }
+        input neuron & weights to first hidden neuron \\ \hline
+        1 & 0.3 \\
+        2 & 0.6 \\
+        3 & 0.5
+    \end{tabular}
+    \caption[Table caption text]{Connections from the augmented input neurons to the first hidden neuron}
+\label{table:name}
+\end{minipage} }
+\end{table}
+
+\item Given the input vector $\vec{x} = \displaystyle \left(
+        \begin{array}{c}
+          1 \\
+          0 \\
+          -1
+        \end{array}
+      \right)^T$
+      and the weight vector $\vec{w} = \displaystyle \left(
+        \begin{array}{c}
+          0.3 \\
+          0.6 \\
+          0.5
+        \end{array}
+      \right)$, we can easily calculate the activation using the following equation:
+      
+      \begin{equation}
+      a = \vec{x} \cdot \vec{w} = 1 \cdot 0.3 + 0 \cdot 0.6 + (-1) \cdot 0.5 = -0.2
+      \end{equation}
+      
+\item By multiplying $\vec{x} \cdot W^h$ we end up with an array $\vec{a}$ whose $i$-th is exactly $\vec{x} \cdot Wˆh_i$, where $W^h_i$ is the $i$-th column of the $W^h$ matrix. This means that the array calculated by the multiplication holds the activation for each neuron.
+
+\item To calculate the activation of the output layer, we simply need to multiply the output vector of the hidden layer $y^h$, a $1 \times 3$ array, by the weights of the output layer, $W^o$, a $3 \times 2$ matrix, similar to what we did to calculate the activation of the hidden layer. Therefore, we get:
+    \begin{equation}
+        \vec{a}^o = y^h \cdot W^o
+    \end{equation}  
+\end{enumerate}
+Notice that the dimensions match and that, as expected, we end up with 2 outputs.
+
+\section{A TLU in Matlab}
+\begin {enumerate}
+\item \textbf {AND-rule}
+  \lstinputlisting[caption={AND.m},label={AND}]{src/AND_rule.m}
+
+\item \textbf {XOR-rule}
+  \lstinputlisting[caption={XOR.m},label={code:XOR}]{src/XOR_rule.m}
+
+\item \textbf {Stop learning}
+ \lstinputlisting[caption={STOP.m},label={code:STOP}]{src/Stop_AND_rule.m}
+\end {enumerate}
+
+\pagebreak
+
+\section{Experimenting with a TLU}
+
+\begin{enumerate}[a)]
+\item \textbf{The error does not decrease each epoch. Why?} \\ 
+The error does not decrease each epoch because sometimes the weights and threshold work for a certain input, although they do not for all inputs. When that happens, the TLU does not adjust the weights and the threshold, not decreasing the weight. \\
+
+\item \textbf{Why are we interested in the summed squared error  $\sum(t(p) - y(p))^2$ instead of simply summing
+N
+the errors  $\sum(t(p) - y(p))$?}\\
+If we were to simply sum the errors, in the case where t < y (t = 0, y = 1), we'd actually be lowering the total error. This would mean that t = 0 y = 1 would be less wrong then the case t = 1, y = 0, which is clearly not what we want, as they are equally wrong. By squaring the difference we eliminate that problem, as we would only be summing positive numbers and the error for those cases would be the same. \\
+
+\item \textbf{Why is the number of epochs required to reach an error of 0 not always the same?}\\ \\
+The number of epochs to reach an error of 0 is not always the same because the weight vector and the threshold are both randomly picked. This means that we can be either very close to the solution or very far from it, which may take a greater number of epochs. \\
+
+\item \textbf{Increase the learning rate from 0.1 to 0.6. What do you observe? Is a higher learning rate better? Explain you answer.}\\ 
+When changing the learning rate from 0.1 to 0.6 it's possible to see that the number of epochs required to reach an error of 0 is usually greater than before. This happens because when we adjust the weight vector with a larger learning rate, we take larger "steps", which can be too much for a certain situation. That way, we end up having to compensate for these bigger steps and take longer to reach the solution. \\
+
+\item \textbf{The input is 0 or 1. Change this to 0.1 or 0.9. Is the TLU still capable of learning the AND- function? What happens if the input is set to 0.2 or 0.8?
+}\\ 
+In both cases, the TLU is still able to learn the AND rule. \\
+
+\item \textbf{
+Which important feature of artificial neural networks did we encounter in (e)?
+}\\ 
+The previous answer indicates that an artificial neural network are capable of learning regardless of the value of the input. This means that as long as the input and output make sense within a certain logic, the neural network will be able to learn the desired function. \\
+
+\item \textbf{Change the vector goal such that the TLU learns a NAND-function (NOT-AND). Does this work too? What happens to the weight values? Explain why the threshold has become negative by drawing a geometrical sketch.}\\ 
+The TLU is able to learn the NAND function. Both the weight values and the threshold become negative because the weight vector always points to the region where y = 1. The separating line for the NAND and AND function is the same, but the regions are swaped. This means that since the threshold and weights were positive for the AND function and since the weight vector needs to point to the opposite side now, they have to become negative. \\
+\end{enumerate}
+
+\pagebreak
+
+\section{XOR-rule}
+Since the error never reaches zero, the XOR rule cannot be learned by the TLU. The reason for that is the fact that there doesn't exist a separating line for the XOR inputs. As so, the TLU is unable to separate the inputs and can't learn the XOR function. \\
+\end{document}
